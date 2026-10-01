@@ -1,195 +1,170 @@
-const API_BASE_URL = 'http://localhost:5005/api';
+import { mockStorage } from './mockStorage';
 
 class ApiClient {
   constructor() {
-    this.baseUrl = API_BASE_URL;
+    this.storage = mockStorage;
   }
 
   getToken() {
     return localStorage.getItem('school_crm_token');
   }
 
-  async request(endpoint, options = {}) {
-    const url = `${this.baseUrl}${endpoint}`;
-    const headers = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
-
-    const token = this.getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const config = {
-      ...options,
-      headers,
-    };
-
-    if (options.body && typeof options.body === 'object') {
-      config.body = JSON.stringify(options.body);
-    }
-
-    try {
-      const response = await fetch(url, config);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong with the request');
-      }
-
-      return data;
-    } catch (error) {
-      console.error(`API Error [${endpoint}]:`, error);
-      throw error;
-    }
-  }
-
   // Auth
-  login(credentials) {
-    return this.request('/auth/login', { method: 'POST', body: credentials });
+  async login(credentials) {
+    return this.storage.login(credentials.email, credentials.password);
   }
-  getMe() {
-    return this.request('/auth/me');
+
+  async getMe() {
+    return this.storage.getMe();
   }
-  updateProfile(data) {
-    return this.request('/auth/profile', { method: 'PUT', body: data });
+
+  async updateProfile(data) {
+    return this.storage.updateProfile(data);
   }
-  changePassword(data) {
-    return this.request('/auth/change-password', { method: 'PUT', body: data });
+
+  async changePassword(data) {
+    return this.storage.changePassword(data.currentPassword, data.newPassword);
   }
 
   // Dashboard
-  getDashboard() {
-    return this.request('/dashboard');
+  async getDashboard() {
+    return this.storage.getDashboard();
   }
 
   // Classes & Divisions
-  getClasses() {
-    return this.request('/classes');
+  async getClasses() {
+    return this.storage.getClasses();
   }
-  addClass(data) {
-    return this.request('/classes', { method: 'POST', body: data });
+
+  async addClass(data) {
+    return this.storage.addClass(data);
   }
-  addDivision(classId, data) {
-    return this.request(`/classes/${classId}/divisions`, { method: 'POST', body: data });
+
+  async addDivision(classId, data) {
+    return this.storage.addDivision(classId, data);
   }
-  updateDivision(id, data) {
-    return this.request(`/classes/divisions/${id}`, { method: 'PUT', body: data });
+
+  async updateDivision(id, data) {
+    return this.storage.updateDivision(id, data);
   }
-  deleteDivision(id) {
-    return this.request(`/classes/divisions/${id}`, { method: 'DELETE' });
+
+  async deleteDivision(id) {
+    return this.storage.deleteDivision(id);
   }
 
   // Students
-  getStudents(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return this.request(`/students?${query}`);
+  async getStudents(params = {}) {
+    return this.storage.getStudents(params);
   }
-  getStudent(id) {
-    return this.request(`/students/${id}`);
+
+  async getStudent(id) {
+    return this.storage.getStudent(id);
   }
-  createStudent(data) {
-    return this.request('/students', { method: 'POST', body: data });
+
+  async createStudent(data) {
+    return this.storage.createStudent(data);
   }
-  updateStudent(id, data) {
-    return this.request(`/students/${id}`, { method: 'PUT', body: data });
+
+  async updateStudent(id, data) {
+    return this.storage.updateStudent(id, data);
   }
-  deleteStudent(id) {
-    return this.request(`/students/${id}`, { method: 'DELETE' });
+
+  async deleteStudent(id) {
+    return this.storage.deleteStudent(id);
   }
 
   // Attendance
-  getAttendanceSheet(params) {
-    const query = new URLSearchParams(params).toString();
-    return this.request(`/attendance/sheet?${query}`);
+  async getAttendanceSheet(params) {
+    return this.storage.getAttendanceSheet(params);
   }
-  saveAttendance(data) {
-    return this.request('/attendance/save', { method: 'POST', body: data });
+
+  async saveAttendance(data) {
+    return this.storage.saveAttendance(data);
   }
-  getAttendanceHistory(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return this.request(`/attendance/history?${query}`);
+
+  async getAttendanceHistory(params = {}) {
+    return this.storage.getAttendanceHistory(params);
   }
 
   // Staff
-  getStaff(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return this.request(`/staff?${query}`);
+  async getStaff(params = {}) {
+    return this.storage.getStaff(params);
   }
-  getStaffById(id) {
-    return this.request(`/staff/${id}`);
+
+  async getStaffById(id) {
+    return this.storage.getStaffById(id);
   }
-  createStaff(data) {
-    return this.request('/staff', { method: 'POST', body: data });
+
+  async createStaff(data) {
+    return this.storage.createStaff(data);
   }
-  updateStaff(id, data) {
-    return this.request(`/staff/${id}`, { method: 'PUT', body: data });
+
+  async updateStaff(id, data) {
+    return this.storage.updateStaff(id, data);
   }
-  deleteStaff(id) {
-    return this.request(`/staff/${id}`, { method: 'DELETE' });
+
+  async deleteStaff(id) {
+    return this.storage.deleteStaff(id);
   }
 
   // Salary
-  getSalaries(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return this.request(`/salaries?${query}`);
+  async getSalaries(params = {}) {
+    return this.storage.getSalaries(params);
   }
-  createSalary(data) {
-    return this.request('/salaries', { method: 'POST', body: data });
+
+  async createSalary(data) {
+    return this.storage.createSalary(data);
   }
-  updateSalary(id, data) {
-    return this.request(`/salaries/${id}`, { method: 'PUT', body: data });
+
+  async updateSalary(id, data) {
+    return this.storage.updateSalary(id, data);
   }
-  deleteSalary(id) {
-    return this.request(`/salaries/${id}`, { method: 'DELETE' });
+
+  async deleteSalary(id) {
+    return this.storage.deleteSalary(id);
   }
 
   // Finance (Income & Expense)
-  getIncomes(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return this.request(`/finance/income?${query}`);
-  }
-  createIncome(data) {
-    return this.request('/finance/income', { method: 'POST', body: data });
-  }
-  updateIncome(id, data) {
-    return this.request(`/finance/income/${id}`, { method: 'PUT', body: data });
-  }
-  deleteIncome(id) {
-    return this.request(`/finance/income/${id}`, { method: 'DELETE' });
+  async getIncomes(params = {}) {
+    return this.storage.getIncomes(params);
   }
 
-  getExpenses(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return this.request(`/finance/expense?${query}`);
-  }
-  createExpense(data) {
-    return this.request('/finance/expense', { method: 'POST', body: data });
-  }
-  updateExpense(id, data) {
-    return this.request(`/finance/expense/${id}`, { method: 'PUT', body: data });
-  }
-  deleteExpense(id) {
-    return this.request(`/finance/expense/${id}`, { method: 'DELETE' });
+  async createIncome(data) {
+    return this.storage.createIncome(data);
   }
 
-  getFinancialSummary() {
-    return this.request('/finance/summary');
+  async deleteIncome(id) {
+    return this.storage.deleteIncome(id);
+  }
+
+  async getExpenses(params = {}) {
+    return this.storage.getExpenses(params);
+  }
+
+  async createExpense(data) {
+    return this.storage.createExpense(data);
+  }
+
+  async deleteExpense(id) {
+    return this.storage.deleteExpense(id);
+  }
+
+  async getFinancialSummary() {
+    return this.storage.getFinancialSummary();
   }
 
   // Reports
-  getReport(type, params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return this.request(`/reports/${type}?${query}`);
+  async getReport(type, params = {}) {
+    return this.storage.getReport(type, params);
   }
 
   // Settings
-  getSettings() {
-    return this.request('/settings');
+  async getSettings() {
+    return this.storage.getSettings();
   }
-  updateSettings(data) {
-    return this.request('/settings', { method: 'PUT', body: data });
+
+  async updateSettings(data) {
+    return this.storage.updateSettings(data);
   }
 }
 
